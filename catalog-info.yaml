@@ -22,7 +22,8 @@ spec:
   lifecycle: experimental
   owner: guest
   definition: |
-    openapi: 3.0.1
+    openapi: 3.1.0
+    $text: ./open_api_spec.yaml
     info:
       title: Guinea Pig API
       version: 1.0.0

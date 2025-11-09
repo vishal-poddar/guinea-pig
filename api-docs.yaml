@@ -1,0 +1,1633 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Alert transformation test
+  description: Alert transformation test operations
+- name: Managed Alert Processor
+  description: Managed Alert Processor operations
+paths:
+  /v1/managed-alert-processor/filter/{filterUuid}:
+    put:
+      tags:
+      - Alert Filters
+      summary: Update filter in MAP database
+      description: Updates an existing filter in the MAP database. This endpoint is
+        used to update an existing filter with the provided filter details from orchestration
+        service.
+      operationId: UpdateFilterByUuid
+      parameters:
+      - name: filterUuid
+        in: path
+        description: Guard filter Uuid to update
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardPlatformFilterResponseView"
+        required: true
+      responses:
+        "204":
+          description: Filter updated successfully
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Alert Filters
+      summary: Delete filters in MAP database
+      description: Deletes an existing filters in the MAP database. This endpoint
+        is used to delete an existing filters with the provided filter ids from orchestration
+        service.
+      operationId: DeleteFilterByUuid
+      parameters:
+      - name: filterUuid
+        in: path
+        description: Guard platform filter Id to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Filter(s) deleted successfully
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/tenant:
+    post:
+      tags:
+      - Managed Alert Processor
+      summary: On Boards a tenant
+      description: On Boards a tenant
+      operationId: onBoardTenant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardTenant"
+        required: true
+      responses:
+        "200":
+          description: Tenant onboarded successfully
+          content:
+            application/json: {}
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/sync/tenants:
+    post:
+      tags:
+      - Managed Alert Processor
+      summary: Syncs all the tenant data from the ECS Guard service
+      description: "Syncs all the tenant data from the ECS Guard service: "
+      operationId: syncGuardTenantsFromGuardService
+      responses:
+        "201":
+          description: Sync request completed
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/sync/filter:
+    post:
+      tags:
+      - Managed Alert Processor
+      summary: Syncs all the filters and playbooks data from the ECS Guard Orchestration
+        service
+      description: "Manually syncs all the filters and playbooks data from the ECS\
+        \ Guard Orchestration service: "
+      operationId: syncGuardFiltersPlaybooks
+      responses:
+        "201":
+          description: Sync request completed
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/process_alerts:
+    post:
+      tags:
+      - Managed Alert Processor
+      summary: Process alerts by passing them through the pipeline with all or selected
+        stages
+      description: "This endpoint is used to test the pipeline for one or more steps\
+        \ for the batch of alerts. The Steps are optional and if not provided, the\
+        \ alerts will be processed through all the steps in the pipeline. Following\
+        \ is the list of steps that can be provided as input - \n1. VERIFY_TENANT_FEATURE\
+        \ - Verifies if the feature is enabled for processing the alert2. VERIFY_TENANT\
+        \ - Verifies if the tenant is a valid MEDR Tenant3. SCHEMA_TRANSFORMATION\
+        \ - Transforms the alert to MEDR schema4. MEDR_ALERT_TO_AVRO_TRANSFORMATION\
+        \ - Transforms the MEDR ALert Avro format5. APPLY_DISCARD_FILTERS - Applies\
+        \ discard filters to the alert6. APPLY_ACTION_FILTERS - Applies action filters\
+        \ to the alert7. APPLY_PLAYBOOK_FILTERS - Applies playbook filters to the\
+        \ alert8. REINSTATE_INITIAL_ORDER - Restores the original order of the alerts9.\
+        \ PUBLISH_TO_KAFKA - Publishes the alert to Kafka topicsIt expects a json\
+        \ object containing an array of alert objects in JSON format and an optional\
+        \ array of steps and returns the list of transformed MEDR alerts."
+      operationId: v1-processAlerts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertRequest"
+        required: true
+      responses:
+        "200":
+          description: Alert processing successful
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/filter:
+    post:
+      tags:
+      - Alert Filters
+      summary: Create filter in MAP database
+      description: Creates a filter in the MAP database. This endpoint is used to
+        create a new filter with the provided filter details from orchestration service.
+      operationId: CreateFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardPlatformFilterResponseView"
+        required: true
+      responses:
+        "201":
+          description: Filter created successfully
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/filter/batchAlertPlaybookMatch:
+    post:
+      tags:
+      - Alert Filters
+      summary: Match alerts against playbooks
+      operationId: v1-batchAlertPlaybookMatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedrAlertAvro"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterResult"
+  /v1/managed-alert-processor/filter/batchAlertDiscardFilter:
+    post:
+      tags:
+      - Alert Filters
+      summary: Apply discard filters
+      operationId: v1-batchAlertDiscardFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedrAlertAvro"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterResult"
+  /v1/managed-alert-processor/filter/batchAlertActionFilter:
+    post:
+      tags:
+      - Alert Filters
+      summary: Apply action filters
+      operationId: v1-batchAlertActionFilter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/MedrAlertAvro"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterResult"
+  /v1/managed-alert-processor/batchAlertTransformation:
+    post:
+      tags:
+      - Alert transformation test
+      summary: Get transformed batch alert for test
+      description: This endpoint is used to test the transformation of a batch of
+        alerts from JSON format to the MedR format.It expects an array of alert objects
+        in JSON format and returns the transformed alerts in a list of JSON nodes.
+      operationId: v1-batchAlertTransformation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/JsonNode"
+        required: true
+      responses:
+        "200":
+          description: Transformed batch alert
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/auth_token:
+    post:
+      tags:
+      - Managed Alert Processor
+      operationId: getAuthToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/managed-alert-processor/tenant/{tenantId}:
+    patch:
+      tags:
+      - Managed Alert Processor
+      summary: Updates certain fields of a tenant based on tenantId
+      description: Updates certain fields of a tenant based on tenantId
+      operationId: updateTenantById
+      parameters:
+      - name: tenantId
+        in: path
+        description: Tenant id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardTenant"
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json: {}
+        "404":
+          description: Tenant or org not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/managed-alert-processor/testDataBricksAlertTransformation/{alertsCount}/{environment}:
+    get:
+      tags:
+      - Alert transformation test
+      summary: Fetch Databricks Alerts for transformation
+      description: Fetches a specific numbers of Alerts from Databricks for transformation
+        testing
+      operationId: v1-fetchDatabricksAlerts
+      parameters:
+      - name: alertsCount
+        in: path
+        description: Number of alerts to fetch
+        required: true
+        schema:
+          type: integer
+          format: int32
+        example: 100
+      - name: environment
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully fetched databricks alerts
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Invalid parameters
+          content:
+            application/json: {}
+  /v1/managed-alert-processor/health:
+    get:
+      tags:
+      - Managed Alert Processor
+      summary: Gets service health status
+      description: Gets service health
+      operationId: v1-getManagedAlertProcessorHealth
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain: {}
+  /v1/managed-alert-processor/generateTestAlerts:
+    get:
+      tags:
+      - Alert transformation test
+      summary: Generate test alerts for transformation
+      description: Generates a specified number of test alerts of a given type for
+        transformation testing
+      operationId: v1-generateTestAlerts
+      parameters:
+      - name: count
+        in: query
+        description: Number of alerts to generate
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 5
+        example: 5
+      - name: type
+        in: query
+        description: Alert Event Type
+        required: false
+        schema:
+          type: string
+          default: RANDOM
+        example: PROCESS
+      - name: tenantIds
+        in: query
+        description: List of tenant Ids
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+        example: "1,2,3"
+      responses:
+        "200":
+          description: Successfully generated test alerts
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Invalid parameters
+          content:
+            application/json: {}
+  /v1/managed-alert-processor/tenant/{id}:
+    delete:
+      tags:
+      - Managed Alert Processor
+      summary: Delete a tenant
+      description: Delete an tenant
+      operationId: deleteTenant
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 'Guard tenant deleted '
+          content:
+            application/json: {}
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "204":
+          description: No Content
+  /v1/managed-alert-processor/filter/tenant/{tenantId}:
+    delete:
+      tags:
+      - Alert Filters
+      summary: Delete filter in MAP database by tenantId
+      description: Deletes existing filters in the MAP database for a given tenantId.
+        This endpoint is used to delete existing filters associated with the provided
+        tenantId from orchestration service.
+      operationId: DeleteFilterByTenantId
+      parameters:
+      - name: tenantId
+        in: path
+        description: Filters to delete for guard tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Filters deleted successfully
+          content:
+            application/json: {}
+        "403":
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ActiveDuration:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    FilterCondition:
+      type: object
+      properties:
+        condition:
+          type: string
+        fieldName:
+          type: string
+        value:
+          type: string
+    FilterConditions:
+      type: object
+      properties:
+        andConditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FilterCondition"
+        orConditions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FilterCondition"
+    GuardPlatformFilterComments:
+      type: object
+      properties:
+        comments:
+          type: string
+        created:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        created_by_display_name:
+          type: string
+    GuardPlatformFilterResponseView:
+      type: object
+      properties:
+        filterId:
+          type: integer
+          format: int32
+        filter_uuid:
+          type: string
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/GuardPlatformFilterComments"
+          uniqueItems: true
+        action:
+          type: string
+          enum:
+          - trigger
+          - whitelist
+          - observation
+          - discard
+        filterType:
+          type: string
+          enum:
+          - Permanent
+          - Temporary
+        activeDuration:
+          $ref: "#/components/schemas/ActiveDuration"
+        tenantUuid:
+          type: string
+        tenant:
+          $ref: "#/components/schemas/GuardTenant"
+        conditions:
+          $ref: "#/components/schemas/FilterConditions"
+        playbookId:
+          type: string
+        recalcState:
+          type: string
+          enum:
+          - Ready
+          - Failed
+          - Pending
+        recalcRegionFailed:
+          type: boolean
+        recalcRegionsRemaining:
+          type: integer
+          format: int32
+        approvalState:
+          type: string
+          enum:
+          - Active
+          - Cloned
+          - Declined
+          - Pending Review
+        description:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        modifiedBy:
+          type: string
+        createdByDisplayName:
+          type: string
+        modifiedByDisplayName:
+          type: string
+        worklog_uuid:
+          type: string
+    GuardTenant:
+      type: object
+      properties:
+        contactEmail:
+          type: string
+        tenant_uuid:
+          type: string
+        environment:
+          type: string
+        ecsTenantId:
+          type: string
+        name:
+          type: string
+        externalName:
+          type: string
+        region:
+          type: string
+        status:
+          type: string
+        venueTenantId:
+          type: string
+        notes:
+          type: string
+        isAthocEnabled:
+          type: boolean
+        isOrgTenant:
+          type: boolean
+        parentTenantUuid:
+          type: string
+        ecsTenantName:
+          type: string
+        displayName:
+          type: string
+        orgid:
+          type: string
+        orgName:
+          type: string
+        oraCustomerId:
+          type: string
+        partnerId:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Tenant Id is missing
+          title: Description of error.
+        messages:
+          type: array
+          items:
+            type: string
+        subStatusCode:
+          type: integer
+          format: int32
+          example: 113
+          title: Sub-status code specific to this error
+      title: Error
+    AlertRequest:
+      type: object
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/JsonNode"
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+    JsonNode:
+      type: object
+    Metadata:
+      type: object
+      properties:
+        pipeline_steps:
+          type: array
+          items:
+            type: string
+            enum:
+            - ALERT_INDEXER
+            - VERIFY_TENANT
+            - VERIFY_TENANT_FEATURE
+            - SCHEMA_TRANSFORMATION
+            - APPLY_DISCARD_FILTERS
+            - APPLY_ACTION_FILTERS
+            - APPLY_PLAYBOOK_FILTERS
+            - MEDR_ALERT_TO_AVRO_TRANSFORMATION
+            - REINSTATE_INITIAL_ORDER
+            - PUBLISH_TO_KAFKA
+        response_type:
+          type: string
+          enum:
+          - JSON
+          - FILE
+        response_data_type:
+          type: array
+          items:
+            type: string
+            enum:
+            - MEDR_ALERT
+            - MEDR_ALERT_AVRO
+            - METADATA
+            - UNIFIED_ALERT_COUNT
+    ConversionObject:
+      type: object
+      properties:
+        recommendedSchema:
+          $ref: "#/components/schemas/Schema"
+        logicalTypeName:
+          type: string
+    FastReaderBuilder:
+      type: object
+      properties:
+        keyClassEnabled:
+          type: boolean
+        classPropEnabled:
+          type: boolean
+    Field:
+      type: object
+      properties:
+        objectProps:
+          type: object
+          additionalProperties:
+            type: object
+    LogicalType:
+      type: object
+      properties:
+        name:
+          type: string
+    MedrAlertAvro:
+      type: object
+      properties:
+        schema:
+          $ref: "#/components/schemas/Schema"
+        uinstigatingProcessOwnerFailedPasswordAttempts:
+          type: integer
+          format: int32
+        uinstigatingProcessPrimaryFileImageArtifactType:
+          type: string
+        uinstigatingProcessPrimaryFileImageOwnerType:
+          type: string
+        uinstigatingProcessPrimaryFileImageOwnerUid:
+          type: string
+        uinstigatingProcessPrimaryFileImageSha256:
+          type: string
+        uinstigatingProcessPrimaryFileImageSuspectedFileType:
+          type: string
+        uinstigatingProcessPrimaryImageSuspectedFileType:
+          type: string
+        utargetNetworkConnectionDestinationAddress:
+          type: string
+        utargetProcessOwnerFailedPasswordAttempts:
+          type: integer
+          format: int32
+        utargetProcessPrimaryImageSuspectedFileType:
+          type: string
+        uwmiTraceOperationAnalysisCompressionType:
+          type: string
+        uwmiTraceOperationAnalysisIsCollectedContentTruncated:
+          type: boolean
+        specificData:
+          $ref: "#/components/schemas/SpecificData"
+        utargetRegistryKeyValue:
+          type: string
+        utargetUserDomain:
+          type: string
+        utargetUserGroup:
+          type: string
+        utargetUserName:
+          type: string
+        utechniqueId:
+          type: string
+        utechniqueName:
+          type: string
+        uthreatClassification:
+          type: string
+        uthreatDetails:
+          type: string
+        uthreatSubclass:
+          type: string
+        utopReasons:
+          type: string
+        utopUsers:
+          type: string
+        uuesTenantId:
+          type: string
+        uuserName:
+          type: string
+        uuserTrustScore:
+          type: integer
+          format: int32
+        uvenueEndpointId:
+          type: string
+        uviolationType:
+          type: string
+        uwindowsEventId:
+          type: string
+        uwmiTraceEventId:
+          type: string
+        uwmiTraceNamespace:
+          type: string
+        uwmiTraceOperation:
+          type: string
+        uzonesAdded:
+          type: string
+        uzoneName:
+          type: string
+        uzoneNames:
+          type: string
+        serviceId:
+          type: string
+        instanceId:
+          type: string
+        threatSubclassEx:
+          type: string
+        ualertId:
+          type: string
+        ualertTime:
+          type: string
+        ualertType:
+          type: string
+        ualertSeverity:
+          type: string
+        utenantId:
+          type: string
+        ucorrelationId:
+          type: string
+        udeviceId:
+          type: string
+        umatchingPlaybookIds:
+          type: string
+        isCylanceOpticsHydrated:
+          type: boolean
+        uaccounts:
+          type: string
+        uactivationTime:
+          type: string
+        ualertsCount:
+          type: integer
+          format: int32
+        ualertName:
+          type: string
+        ualertStatus:
+          type: string
+        ualertUrl:
+          type: string
+        uanalystFilterAction:
+          type: string
+        uanalystFilterId:
+          type: string
+        uapplicationName:
+          type: string
+        uapplicationSha256:
+          type: string
+        uattestationRuleFailure:
+          type: string
+        uattestationState:
+          type: string
+        uattestationSubtype:
+          type: string
+        uattestationType:
+          type: string
+        uautoRun:
+          type: boolean
+        ucategory:
+          type: string
+        uconsumerText:
+          type: string
+        uconsumerTextLength:
+          type: integer
+          format: int32
+        ucontext:
+          type: string
+        ucreatedOn:
+          type: string
+        ucylanceScore:
+          type: integer
+          format: int32
+        udescription:
+          type: string
+        udestinationAddress:
+          type: string
+        udestinationIp:
+          type: string
+        udestinationPort:
+          type: integer
+          format: int32
+        udetectedBy:
+          type: string
+        udetectionId:
+          type: string
+        udetectionRuleId:
+          type: string
+        udetectionRuleName:
+          type: string
+        udetectionRuleSeverity:
+          type: string
+        udetectorName:
+          type: string
+        udeviceHostName:
+          type: string
+        udeviceMessage:
+          type: string
+        udeviceName:
+          type: string
+        udnsTunnellingScore:
+          type: integer
+          format: int32
+        udriveType:
+          type: string
+        uendpointId:
+          type: string
+        uendpointIp:
+          type: string
+        uendTime:
+          type: string
+        ueventsCount:
+          type: integer
+          format: int32
+        ueventId:
+          type: string
+        ueventName:
+          type: string
+        ueventType:
+          type: string
+        ufailedPasswordAttempts:
+          type: integer
+          format: int32
+        ufileName:
+          type: string
+        ufileOwner:
+          type: string
+        ufilePath:
+          type: string
+        ufileType:
+          type: string
+        ufirstName:
+          type: string
+        ufoundDate:
+          type: string
+        uguardPlatformRegionId:
+          type: string
+        uguardPlatformTenantId:
+          type: string
+        uinstallerSource:
+          type: string
+        uinstigatingProcessId:
+          type: string
+        uinstigatingProcessName:
+          type: string
+        uinterpreter:
+          type: string
+        uinterpreterVersion:
+          type: string
+        uipAddress:
+          type: string
+        uipAddresses:
+          type: string
+        uipRepContext:
+          type: string
+        uipRepRisk:
+          type: string
+        uisMalware:
+          type: boolean
+        uisRunning:
+          type: boolean
+        uisUniqueTo:
+          type: boolean
+        ukeyboardModelScore:
+          type: integer
+          format: int32
+        ulastName:
+          type: string
+        uloggedOnUsers:
+          type: string
+        ulogonModelScore:
+          type: integer
+          format: int32
+        umaliciousUrls:
+          type: string
+        umanufacturer:
+          type: string
+        umessage:
+          type: string
+        umetaModelScore:
+          type: integer
+          format: int32
+        umitreData:
+          type: string
+        umouseModelScore:
+          type: integer
+          format: int32
+        unetworkModelScore:
+          type: integer
+          format: int32
+        unetworkType:
+          type: string
+        uobjectType:
+          type: string
+        uoccurrenceTime:
+          type: string
+        uoperation:
+          type: string
+        uoperationLength:
+          type: integer
+          format: int32
+        uorganizationId:
+          type: string
+        uosVersion:
+          type: string
+        upackageName:
+          type: string
+        upackageVersion:
+          type: string
+        upayload:
+          type: string
+        upayloadLength:
+          type: integer
+          format: int32
+        uplatform:
+          type: string
+        upolicyChange:
+          type: string
+        upolicyName:
+          type: string
+        uprocessId:
+          type: string
+        uprocessModelScore:
+          type: integer
+          format: int32
+        uprocessName:
+          type: string
+        uproductName:
+          type: string
+        uprotocol:
+          type: string
+        uproviderName:
+          type: string
+        uquestionName:
+          type: string
+        uquestionRecordType:
+          type: string
+        ureasonsCount:
+          type: integer
+          format: int32
+        ureceivedTime:
+          type: string
+        urenamed:
+          type: string
+        uresolution:
+          type: string
+        uresolvedAddress:
+          type: string
+        uresolvedAddressCount:
+          type: integer
+          format: int32
+        uriskLevel:
+          type: string
+        uscriptBlockLength:
+          type: integer
+          format: int32
+        uscriptBlockText:
+          type: string
+        usensorName:
+          type: string
+        usensorVersion:
+          type: string
+        usessionId:
+          type: string
+        usessionUrl:
+          type: string
+        useverity:
+          type: string
+        useveritySortLevel:
+          type: string
+        usignature:
+          type: string
+        usigningIdentity:
+          type: string
+        usigningIdentitySha256:
+          type: string
+        usourceHost:
+          type: string
+        usourceIp:
+          type: string
+        usourcePort:
+          type: integer
+          format: int32
+        usourceProductName:
+          type: string
+        ustartTime:
+          type: string
+        ustateName:
+          type: string
+        usubcategory:
+          type: string
+        utacticId:
+          type: string
+        utacticName:
+          type: string
+        utargetApiDll:
+          type: string
+        utargetApiFunction:
+          type: string
+        utargetApiParameters:
+          type: string
+        utargetDomainName:
+          type: string
+        utargetFileArtifactType:
+          type: string
+        utargetFileCreated:
+          type: string
+        utargetFileIsHidden:
+          type: boolean
+        utargetFileLastModified:
+          type: string
+        utargetFileMd5hash:
+          type: string
+        utargetFileOwner:
+          type: string
+        utargetFileOwnerDomain:
+          type: string
+        utargetFileOwnerName:
+          type: string
+        utargetFilePath:
+          type: string
+        utargetFileSha256:
+          type: string
+        utargetFileSize:
+          type: integer
+          format: int32
+        utargetProcessEndDate:
+          type: string
+        utargetProcessId:
+          type: string
+        utargetProcessName:
+          type: string
+        utargetProcessOwner:
+          type: string
+        utargetProcessOwnerName:
+          type: string
+        utargetRegistryKeyPath:
+          type: string
+        utargetProcessParentPid:
+          type: integer
+          format: int32
+        utargetProcessStartDate:
+          type: string
+        uaction:
+          type: string
+        uassets:
+          type: string
+        uecoId:
+          type: string
+        uentity:
+          type: string
+        uflowId:
+          type: string
+        ukey:
+          type: string
+        ulabels:
+          type: string
+        umd5:
+          type: string
+        umodel:
+          type: string
+        upath:
+          type: string
+        usha256:
+          type: string
+        ussid:
+          type: string
+        ustatus:
+          type: string
+        uuser:
+          type: string
+        uuserId:
+          type: string
+        usource:
+          type: string
+        usyslogCorrelationId:
+          type: string
+        uinstigatingProcessArtifactType:
+          type: string
+        uinstigatingProcessCommandLine:
+          type: string
+        uinstigatingProcessDescription:
+          type: string
+        uinstigatingProcessEndDate:
+          type: string
+        uinstigatingProcessFilePath:
+          type: string
+        uinstigatingProcessFileOwner:
+          type: string
+        uinstigatingProcessImagefilesha256:
+          type: string
+        uinstigatingProcessIntegrityLevel:
+          type: string
+        uinstigatingProcessIsElevated:
+          type: string
+        uinstigatingProcessOwner:
+          type: string
+        uinstigatingProcessOwnerAccountType:
+          type: string
+        uinstigatingProcessOwnerArtifactType:
+          type: string
+        uinstigatingProcessOwnerCountryCode:
+          type: string
+        uinstigatingProcessOwnerDomain:
+          type: string
+        uinstigatingProcessOwnerName:
+          type: string
+        uinstigatingProcessParentPid:
+          type: integer
+          format: int32
+        uinstigatingProcessPrimaryFileImageMd5:
+          type: string
+        uinstigatingProcessPrimaryFileImagePath:
+          type: string
+        uinstigatingProcessStartDate:
+          type: string
+        uscriptBlockTextTruncated:
+          type: boolean
+        utargetFileOwnerArtifactType:
+          type: string
+        utargetFileOwnerCountryCode:
+          type: string
+        utargetFileOwnerFailedPasswordAttempts:
+          type: integer
+          format: int32
+        utargetFileSuspectedFileType:
+          type: string
+        utargetNetworkConnectionArtifactType:
+          type: string
+        utargetNetworkConnectionSourceAddress:
+          type: string
+        utargetNetworkConnectionSourcePort:
+          type: integer
+          format: int32
+        utargetProcessArtifactType:
+          type: string
+        utargetProcessCommandLine:
+          type: string
+        utargetProcessDescription:
+          type: string
+        utargetProcessImagefilesha256:
+          type: string
+        utargetProcessOwnerArtifactType:
+          type: string
+        utargetProcessOwnerCountryCode:
+          type: string
+        utargetProcessOwnerDomain:
+          type: string
+        utargetProcessParentStartDate:
+          type: string
+        utargetProcessPrimaryFileImageSha256:
+          type: string
+        utargetProcessPrimaryImageArtifactType:
+          type: string
+        utargetProcessPrimaryImageMd5:
+          type: string
+        utargetProcessPrimaryImageOwnerId:
+          type: string
+        utargetProcessPrimaryImageOwnerType:
+          type: string
+        utargetProcessPrimaryImageOwnerUid:
+          type: string
+        utargetProcessPrimaryImagePath:
+          type: string
+        utargetRegistryKeyReferencedFileType:
+          type: string
+        utargetRegistryValueName:
+          type: string
+        uwmiTraceOperationAnalysisChecksum:
+          type: string
+        uwmiTraceOperationAnalysisChecksumType:
+          type: string
+        uwmiTraceOperationAnalysisEncodingType:
+          type: string
+        uwmiTraceOperationAnalysisEntropy:
+          type: string
+        uwmiTraceOperationAnalysisMachineName:
+          type: string
+        uwmiTraceOperationAnalysisOriginalSize:
+          type: string
+        uwmiTraceOriginatingMachineName:
+          type: string
+        udetectionRuleDescription:
+          type: string
+        udetectionRulePolicyGroup:
+          type: string
+        udnsTunnellingNameServer:
+          type: string
+        uendpointLocationCountryIsoCode:
+          type: string
+    Schema:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - RECORD
+          - ENUM
+          - ARRAY
+          - MAP
+          - UNION
+          - FIXED
+          - STRING
+          - BYTES
+          - INT
+          - LONG
+          - FLOAT
+          - DOUBLE
+          - BOOLEAN
+          - "NULL"
+        logicalType:
+          $ref: "#/components/schemas/LogicalType"
+        aliases:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        name:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/Field"
+        error:
+          type: boolean
+        fullName:
+          type: string
+        elementType:
+          $ref: "#/components/schemas/Schema"
+        valueType:
+          $ref: "#/components/schemas/Schema"
+        namespace:
+          type: string
+        types:
+          type: array
+          items:
+            $ref: "#/components/schemas/Schema"
+        nullable:
+          type: boolean
+        enumDefault:
+          type: string
+        enumSymbols:
+          type: array
+          items:
+            type: string
+        fixedSize:
+          type: integer
+          format: int32
+        doc:
+          type: string
+        union:
+          type: boolean
+        objectProps:
+          type: object
+          additionalProperties:
+            type: object
+    SpecificData:
+      type: object
+      properties:
+        classLoader:
+          type: object
+          properties:
+            name:
+              type: string
+            registeredAsParallelCapable:
+              type: boolean
+            parent:
+              type: object
+              properties:
+                name:
+                  type: string
+                registeredAsParallelCapable:
+                  type: boolean
+                unnamedModule:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    descriptor:
+                      type: object
+                      properties:
+                        open:
+                          type: boolean
+                        automatic:
+                          type: boolean
+                    named:
+                      type: boolean
+                    annotations:
+                      type: array
+                      items:
+                        type: object
+                    declaredAnnotations:
+                      type: array
+                      items:
+                        type: object
+                    packages:
+                      type: array
+                      items:
+                        type: string
+                      uniqueItems: true
+                    layer:
+                      type: object
+                definedPackages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      annotations:
+                        type: array
+                        items:
+                          type: object
+                      declaredAnnotations:
+                        type: array
+                        items:
+                          type: object
+                      sealed:
+                        type: boolean
+                      specificationTitle:
+                        type: string
+                      specificationVersion:
+                        type: string
+                      specificationVendor:
+                        type: string
+                      implementationTitle:
+                        type: string
+                      implementationVersion:
+                        type: string
+                      implementationVendor:
+                        type: string
+                defaultAssertionStatus:
+                  type: boolean
+                  writeOnly: true
+            unnamedModule:
+              type: object
+              properties:
+                name:
+                  type: string
+                descriptor:
+                  type: object
+                  properties:
+                    open:
+                      type: boolean
+                    automatic:
+                      type: boolean
+                named:
+                  type: boolean
+                annotations:
+                  type: array
+                  items:
+                    type: object
+                declaredAnnotations:
+                  type: array
+                  items:
+                    type: object
+                packages:
+                  type: array
+                  items:
+                    type: string
+                  uniqueItems: true
+                layer:
+                  type: object
+            definedPackages:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  annotations:
+                    type: array
+                    items:
+                      type: object
+                  declaredAnnotations:
+                    type: array
+                    items:
+                      type: object
+                  sealed:
+                    type: boolean
+                  specificationTitle:
+                    type: string
+                  specificationVersion:
+                    type: string
+                  specificationVendor:
+                    type: string
+                  implementationTitle:
+                    type: string
+                  implementationVersion:
+                    type: string
+                  implementationVendor:
+                    type: string
+            defaultAssertionStatus:
+              type: boolean
+              writeOnly: true
+        conversions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversionObject"
+        fastReaderEnabled:
+          type: boolean
+        fastReaderBuilder:
+          $ref: "#/components/schemas/FastReaderBuilder"
+        customCoders:
+          type: boolean
+          writeOnly: true
+    ActionMetrics:
+      type: object
+      description: Processing metrics for action filter operations
+      properties:
+        totalProcessingTimeMs:
+          type: integer
+          format: int64
+        totalAlertsProcessed:
+          type: integer
+          format: int32
+    DiscardMetrics:
+      type: object
+      description: Processing metrics for discard operations
+      properties:
+        totalProcessingTimeMs:
+          type: integer
+          format: int64
+        filterApplicationTimeMs:
+          type: integer
+          format: int64
+        totalAlertsProcessed:
+          type: integer
+          format: int32
+        alertsDiscarded:
+          type: integer
+          format: int32
+        alertsRetained:
+          type: integer
+          format: int32
+    FilterResult:
+      type: object
+      description: Result of filter operation containing processed alerts and metrics
+      properties:
+        filteredAlerts:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: object
+        matchedAlerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchedAlert"
+        playbookMatches:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlaybookMatch"
+        filterId:
+          type: string
+        filterAction:
+          type: string
+        alertProcessingTimeMs:
+          type: integer
+          format: int64
+        matchedPlaybookIds:
+          type: array
+          items:
+            type: string
+        processingMetricsDiscardFilters:
+          $ref: "#/components/schemas/DiscardMetrics"
+        processingMetricsApplyingActionsFilters:
+          $ref: "#/components/schemas/ActionMetrics"
+        processingMetricsMatchingPlaybooks:
+          $ref: "#/components/schemas/PlaybookMetrics"
+      title: Filter Result
+    MatchedAlert:
+      type: object
+      properties:
+        alert:
+          type: object
+          additionalProperties:
+            type: object
+    PlaybookMatch:
+      type: object
+      properties:
+        alert:
+          type: object
+          additionalProperties:
+            type: object
+    PlaybookMetrics:
+      type: object
+      description: Processing metrics for playbook match operations
+      properties:
+        totalProcessingTimeMs:
+          type: integer
+          format: int64
+        totalAlertsProcessed:
+          type: integer
+          format: int32
+        alertsWithMatches:
+          type: integer
+          format: int32
+        alertsWithoutMatches:
+          type: integer
+          format: int32
