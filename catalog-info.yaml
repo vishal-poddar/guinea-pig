@@ -22,4 +22,4 @@ spec:
   lifecycle: experimental
   owner: guest
   definition:
-    $text: https://github.com/vishal-poddar/guinea-pig/blob/main/api-docs.yaml
+    $text: ./api-docs.yaml
