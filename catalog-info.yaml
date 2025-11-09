@@ -21,10 +21,4 @@ spec:
   type: openapi
   lifecycle: experimental
   owner: guest
-  definition: |
-    openapi: 3.1.0
-    $text: ./open_api_spec.yaml
-    info:
-      title: Guinea Pig API
-      version: 1.0.0
-      description: A simple Spring Boot application with test API and Swagger documentation
+  definition: ./open_api_spec.yaml
