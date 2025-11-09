@@ -1,0 +1,29 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: guinea-pig
+  description: A simple Spring Boot application with test API and Swagger docs
+  annotations:
+    github.com/project-slug: vishal-poddar/guinea-pig
+spec:
+  type: service
+  lifecycle: experimental
+  owner: guest
+  providesApis:
+    - guinea-pig-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: guinea-pig-api
+  description: Guinea Pig Test API
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: guest
+  definition: |
+    openapi: 3.0.1
+    info:
+      title: Guinea Pig API
+      version: 1.0.0
+      description: A simple Spring Boot application with test API and Swagger documentation
