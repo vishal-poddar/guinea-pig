@@ -21,4 +21,5 @@ spec:
   type: openapi
   lifecycle: experimental
   owner: guest
-  definition: ./open_api_spec.yaml
+  definition:
+    $text: https://github.com/vishal-poddar/guinea-pig/blob/main/api-docs.yaml
